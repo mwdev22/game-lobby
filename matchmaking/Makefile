@@ -2,7 +2,7 @@
 include ./.env
 export $(shell sed 's/=.*//' .env)
 
-ROOT_PKG=../
+ROOT_PKG=./
 # Project variables
 PROJECT_NAME := flat
 PKG := ./...
