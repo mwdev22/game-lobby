@@ -1,6 +1,6 @@
 package notification
 
-import "github.com/mwdev22/matchmaking"
+import "matchmaking"
 
 type Client struct {
 	publisher matchmaking.Publisher

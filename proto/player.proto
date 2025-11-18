@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package player;
+
+option go_package = "gen/playerpb";
+
+// ==================== Messages ====================
+
+message CreatePlayerRequest {
+  string name = 1;
+  string email = 2;
+}
+
+message CreatePlayerResponse {
+  string player_id = 1;
+  string name = 2;
+  int32 skill_rank = 3;
+  int64 created_at = 4;
+}
+
+message GetPlayerRequest {
+  string player_id = 1;
+}
+
+message PlayerProfile {
+  string player_id = 1;
+  string name = 2;
+  string email = 3;
+  int32 skill_rank = 4;
+  int32 total_matches = 5;
+  int32 wins = 6;
+  int32 losses = 7;
+  int64 created_at = 8;
+  int64 last_online = 9;
+}
+
+message GetPlayerResponse {
+  PlayerProfile player = 1;
+}
+
+message UpdatePlayerRequest {
+  string player_id = 1;
+  optional string name = 2;
+  optional int32 skill_rank = 3;
+}
+
+message UpdatePlayerResponse {
+  bool success = 1;
+  PlayerProfile player = 2;
+}
+
+message GetPlayerStatsRequest {
+  string player_id = 1;
+}
+
+message PlayerStats {
+  int32 total_matches = 1;
+  int32 wins = 2;
+  int32 losses = 3;
+  double win_rate = 4;
+  int32 skill_rank = 5;
+  int32 rank_change_last_match = 6;
+}
+
+message GetPlayerStatsResponse {
+  PlayerStats stats = 1;
+}
+
+message SearchPlayersRequest {
+  string query = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message SearchPlayersResponse {
+  repeated PlayerProfile players = 1;
+  int32 total_count = 2;
+}
+
+// ==================== Service ====================
+
+service PlayerService {
+  rpc CreatePlayer(CreatePlayerRequest) returns (CreatePlayerResponse);
+  rpc GetPlayer(GetPlayerRequest) returns (GetPlayerResponse);
+  rpc UpdatePlayer(UpdatePlayerRequest) returns (UpdatePlayerResponse);
+  rpc GetPlayerStats(GetPlayerStatsRequest) returns (GetPlayerStatsResponse);
+  rpc SearchPlayers(SearchPlayersRequest) returns (SearchPlayersResponse);
+}

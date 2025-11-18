@@ -8,7 +8,6 @@ package matchmakingpb
 
 import (
 	context "context"
-
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,11 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MatchmakingService_JoinQueue_FullMethodName        = "/matchmaking.MatchmakingService/JoinQueue"
-	MatchmakingService_LeaveQueue_FullMethodName       = "/matchmaking.MatchmakingService/LeaveQueue"
-	MatchmakingService_GetQueueStatus_FullMethodName   = "/matchmaking.MatchmakingService/GetQueueStatus"
-	MatchmakingService_StreamMatchFound_FullMethodName = "/matchmaking.MatchmakingService/StreamMatchFound"
-	MatchmakingService_CancelMatch_FullMethodName      = "/matchmaking.MatchmakingService/CancelMatch"
+	MatchmakingService_JoinQueue_FullMethodName       = "/matchmaking.MatchmakingService/JoinQueue"
+	MatchmakingService_LeaveQueue_FullMethodName      = "/matchmaking.MatchmakingService/LeaveQueue"
+	MatchmakingService_GetQueueStatus_FullMethodName  = "/matchmaking.MatchmakingService/GetQueueStatus"
+	MatchmakingService_CancelMatch_FullMethodName     = "/matchmaking.MatchmakingService/CancelMatch"
+	MatchmakingService_GetMatchHistory_FullMethodName = "/matchmaking.MatchmakingService/GetMatchHistory"
 )
 
 // MatchmakingServiceClient is the client API for MatchmakingService service.
@@ -34,8 +33,8 @@ type MatchmakingServiceClient interface {
 	JoinQueue(ctx context.Context, in *JoinQueueRequest, opts ...grpc.CallOption) (*JoinQueueResponse, error)
 	LeaveQueue(ctx context.Context, in *LeaveQueueRequest, opts ...grpc.CallOption) (*LeaveQueueResponse, error)
 	GetQueueStatus(ctx context.Context, in *GetQueueStatusRequest, opts ...grpc.CallOption) (*GetQueueStatusResponse, error)
-	StreamMatchFound(ctx context.Context, in *MatchFoundRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[MatchInfo], error)
 	CancelMatch(ctx context.Context, in *CancelMatchRequest, opts ...grpc.CallOption) (*CancelMatchResponse, error)
+	GetMatchHistory(ctx context.Context, in *GetMatchHistoryRequest, opts ...grpc.CallOption) (*GetMatchHistoryResponse, error)
 }
 
 type matchmakingServiceClient struct {
@@ -76,29 +75,20 @@ func (c *matchmakingServiceClient) GetQueueStatus(ctx context.Context, in *GetQu
 	return out, nil
 }
 
-func (c *matchmakingServiceClient) StreamMatchFound(ctx context.Context, in *MatchFoundRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[MatchInfo], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &MatchmakingService_ServiceDesc.Streams[0], MatchmakingService_StreamMatchFound_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[MatchFoundRequest, MatchInfo]{ClientStream: stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type MatchmakingService_StreamMatchFoundClient = grpc.ServerStreamingClient[MatchInfo]
-
 func (c *matchmakingServiceClient) CancelMatch(ctx context.Context, in *CancelMatchRequest, opts ...grpc.CallOption) (*CancelMatchResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CancelMatchResponse)
 	err := c.cc.Invoke(ctx, MatchmakingService_CancelMatch_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *matchmakingServiceClient) GetMatchHistory(ctx context.Context, in *GetMatchHistoryRequest, opts ...grpc.CallOption) (*GetMatchHistoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMatchHistoryResponse)
+	err := c.cc.Invoke(ctx, MatchmakingService_GetMatchHistory_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -112,8 +102,8 @@ type MatchmakingServiceServer interface {
 	JoinQueue(context.Context, *JoinQueueRequest) (*JoinQueueResponse, error)
 	LeaveQueue(context.Context, *LeaveQueueRequest) (*LeaveQueueResponse, error)
 	GetQueueStatus(context.Context, *GetQueueStatusRequest) (*GetQueueStatusResponse, error)
-	StreamMatchFound(*MatchFoundRequest, grpc.ServerStreamingServer[MatchInfo]) error
 	CancelMatch(context.Context, *CancelMatchRequest) (*CancelMatchResponse, error)
+	GetMatchHistory(context.Context, *GetMatchHistoryRequest) (*GetMatchHistoryResponse, error)
 	mustEmbedUnimplementedMatchmakingServiceServer()
 }
 
@@ -133,11 +123,11 @@ func (UnimplementedMatchmakingServiceServer) LeaveQueue(context.Context, *LeaveQ
 func (UnimplementedMatchmakingServiceServer) GetQueueStatus(context.Context, *GetQueueStatusRequest) (*GetQueueStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetQueueStatus not implemented")
 }
-func (UnimplementedMatchmakingServiceServer) StreamMatchFound(*MatchFoundRequest, grpc.ServerStreamingServer[MatchInfo]) error {
-	return status.Errorf(codes.Unimplemented, "method StreamMatchFound not implemented")
-}
 func (UnimplementedMatchmakingServiceServer) CancelMatch(context.Context, *CancelMatchRequest) (*CancelMatchResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelMatch not implemented")
+}
+func (UnimplementedMatchmakingServiceServer) GetMatchHistory(context.Context, *GetMatchHistoryRequest) (*GetMatchHistoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMatchHistory not implemented")
 }
 func (UnimplementedMatchmakingServiceServer) mustEmbedUnimplementedMatchmakingServiceServer() {}
 func (UnimplementedMatchmakingServiceServer) testEmbeddedByValue()                            {}
@@ -214,17 +204,6 @@ func _MatchmakingService_GetQueueStatus_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MatchmakingService_StreamMatchFound_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(MatchFoundRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(MatchmakingServiceServer).StreamMatchFound(m, &grpc.GenericServerStream[MatchFoundRequest, MatchInfo]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type MatchmakingService_StreamMatchFoundServer = grpc.ServerStreamingServer[MatchInfo]
-
 func _MatchmakingService_CancelMatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CancelMatchRequest)
 	if err := dec(in); err != nil {
@@ -239,6 +218,24 @@ func _MatchmakingService_CancelMatch_Handler(srv interface{}, ctx context.Contex
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MatchmakingServiceServer).CancelMatch(ctx, req.(*CancelMatchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MatchmakingService_GetMatchHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMatchHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MatchmakingServiceServer).GetMatchHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MatchmakingService_GetMatchHistory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MatchmakingServiceServer).GetMatchHistory(ctx, req.(*GetMatchHistoryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -266,13 +263,11 @@ var MatchmakingService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "CancelMatch",
 			Handler:    _MatchmakingService_CancelMatch_Handler,
 		},
-	},
-	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "StreamMatchFound",
-			Handler:       _MatchmakingService_StreamMatchFound_Handler,
-			ServerStreams: true,
+			MethodName: "GetMatchHistory",
+			Handler:    _MatchmakingService_GetMatchHistory_Handler,
 		},
 	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "matchmaking.proto",
 }

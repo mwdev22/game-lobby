@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package session;
+
+option go_package = "gen/sessionpb";
+
+// ==================== Messages ====================
+
+message CreateSessionRequest {
+  string match_id = 1;
+  repeated string player_ids = 2;
+  string game_mode = 3;
+  string region = 4;
+}
+
+message CreateSessionResponse {
+  string session_id = 1;
+  string session_token = 2;
+  string server_address = 3;
+  int32 server_port = 4;
+  int64 expires_at = 5;
+}
+
+message GetSessionRequest {
+  string session_id = 1;
+}
+
+message SessionInfo {
+  string session_id = 1;
+  string match_id = 2;
+  repeated string player_ids = 3;
+  string game_mode = 4;
+  string region = 5;
+  string status = 6; // "active", "completed", "expired"
+  string server_address = 7;
+  int32 server_port = 8;
+  int64 created_at = 9;
+  int64 expires_at = 10;
+}
+
+message GetSessionResponse {
+  SessionInfo session = 1;
+}
+
+message EndSessionRequest {
+  string session_id = 1;
+  repeated PlayerSessionResult results = 2;
+}
+
+message PlayerSessionResult {
+  string player_id = 1;
+  int32 score = 2;
+  bool winner = 3;
+}
+
+message EndSessionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ValidateSessionTokenRequest {
+  string session_token = 1;
+  string player_id = 2;
+}
+
+message ValidateSessionTokenResponse {
+  bool valid = 1;
+  string session_id = 2;
+  SessionInfo session = 3;
+}
+
+message GetActiveSessionsRequest {
+  string player_id = 1;
+}
+
+message GetActiveSessionsResponse {
+  repeated SessionInfo sessions = 1;
+}
+
+// ==================== Service ====================
+
+service SessionService {
+  rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse);
+  rpc GetSession(GetSessionRequest) returns (GetSessionResponse);
+  rpc EndSession(EndSessionRequest) returns (EndSessionResponse);
+  rpc ValidateSessionToken(ValidateSessionTokenRequest) returns (ValidateSessionTokenResponse);
+  rpc GetActiveSessions(GetActiveSessionsRequest) returns (GetActiveSessionsResponse);
+}

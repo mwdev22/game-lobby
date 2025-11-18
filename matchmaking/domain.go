@@ -16,8 +16,6 @@ const (
 	RegionAS Region = "Asia"
 )
 
-// here is the place where u define all domain objects and interfaces used by application
-
 type Player struct {
 	ID        string
 	Name      string
@@ -52,6 +50,10 @@ type Notifier interface {
 
 type Publisher interface {
 	Publish(topic string, message []byte) error
+}
+
+type Consumer interface {
+	Subscribe(topic string, handler func(message []byte)) error
 }
 
 type MatchMaker interface {

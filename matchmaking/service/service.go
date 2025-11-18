@@ -1,9 +1,9 @@
 package service
 
 import (
-	matchmakingpb "gen/matchmaking"
+	matchmakingpb "gen/matchmakingpb"
 
-	"github.com/mwdev22/matchmaking"
+	"matchmaking"
 )
 
 type Service struct {

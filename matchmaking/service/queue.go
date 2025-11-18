@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	matchmakingpb "gen/matchmaking"
+	matchmakingpb "gen/matchmakingpb"
 )
 
 func (s *Service) JoinQueue(ctx context.Context, req *matchmakingpb.JoinQueueRequest) (*matchmakingpb.JoinQueueResponse, error) {

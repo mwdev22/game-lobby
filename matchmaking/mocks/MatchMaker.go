@@ -5,7 +5,8 @@
 package mocks
 
 import (
-	"github.com/mwdev22/matchmaking"
+	"matchmaking"
+
 	mock "github.com/stretchr/testify/mock"
 )
 

@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"log"
-	"matchmaking/api"
+	"session/api"
 
 	config "github.com/mwdev22/gocfg"
 	"github.com/mwdev22/grpclib/grpcserver"

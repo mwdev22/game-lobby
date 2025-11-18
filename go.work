@@ -3,4 +3,7 @@ go 1.25.4
 use (
     ./matchmaking
     ./gen
+    ./gateway
+    ./session
+    ./player
 )

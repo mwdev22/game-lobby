@@ -2,25 +2,17 @@
 include ./.env
 export $(shell sed 's/=.*//' .env)
 
-ROOT_PKG=../
-# Project variables
 PROJECT_NAME := flat
 PKG := ./...
 MAIN := ./cmd/api/
 MIGRATIONS_DIR = migrations
-PROTO_DIR = ${ROOT_PKG}proto
 
 MOCKS_DIR := ./mocks
 MOCKERY_CONFIG_PATH := ~/.mockery.yml
 
-
-FMT := go fmt
-VET := go vet
-TEST := go test
 MIGRATE := migrate
 
-# Targets
-.PHONY: all build clean fmt vet test run migrate-create migrate-up migrate-down migrate-drop
+.PHONY: all build fmt vet test run migrate-create migrate-up migrate-down migrate-drop swag mocks
 
 all: fmt vet test build
 
@@ -56,14 +48,6 @@ migrate-drop:
 
 swag:
 	@swag init --generalInfo ./cmd/main.go
-
-proto:
-	@mkdir -p ../gen/matchmakingpb
-	@protoc -I=$(PROTO_DIR) \
-		--go_out=paths=source_relative:${ROOT_PKG}gen/matchmakingpb/ \
-		--go-grpc_out=paths=source_relative:${ROOT_PKG}gen/matchmakingpb/ \
-		$(PROTO_DIR)/matchmaking.proto
-	@echo "--- PB GENERATED ---"
 
 mocks:
 	mockery --config $(MOCKERY_CONFIG_PATH)
