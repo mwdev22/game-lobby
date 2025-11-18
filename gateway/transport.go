@@ -1,9 +1,6 @@
 package gateway
 
 // ==================== HTTP Request DTOs ====================
-// These are used for parsing HTTP requests only
-
-// Player HTTP Requests
 type CreatePlayerRequest struct {
 	Name  string `json:"name" validate:"required,min=3,max=50"`
 	Email string `json:"email" validate:"required,email"`
@@ -15,7 +12,6 @@ type UpdatePlayerRequest struct {
 	SkillRank *int32  `json:"skill_rank,omitempty" validate:"omitempty,min=0"`
 }
 
-// Matchmaking HTTP Requests
 type JoinQueueRequest struct {
 	PlayerID string `json:"player_id" validate:"required"`
 	GameMode string `json:"game_mode" validate:"required"`
@@ -27,7 +23,6 @@ type CancelMatchRequest struct {
 	MatchID  string `json:"match_id" validate:"required"`
 }
 
-// Session HTTP Requests
 type CreateSessionRequest struct {
 	MatchID   string   `json:"match_id" validate:"required"`
 	PlayerIDs []string `json:"player_ids" validate:"required,min=1"`
@@ -50,9 +45,3 @@ type ValidateTokenRequest struct {
 type ApiResponse struct {
 	Data interface{} `json:"data,omitempty"`
 }
-
-type ErrorResponse struct {
-	Error   string `json:"error"`
-	Message string `json:"message,omitempty"`
-}
-

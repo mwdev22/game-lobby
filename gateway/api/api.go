@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"gateway"
+	"gateway/service"
 	"log"
 	"net/http"
 	"os"
@@ -17,6 +18,7 @@ import (
 
 type Api struct {
 	cfg         *config.Config
+	service     *service.Service
 	matchmaking gateway.MatchmakingClient
 	session     gateway.SessionClient
 	player      gateway.PlayerClient
@@ -52,6 +54,8 @@ func WithPlayerClient(cli gateway.PlayerClient) func(*Api) {
 
 func (a *Api) Run() error {
 	mux := chi.NewMux()
+
+	a.service = service.NewService(a.player, a.matchmaking, a.session)
 
 	a.Mount(mux)
 

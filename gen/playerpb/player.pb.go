@@ -76,9 +76,6 @@ func (x *CreatePlayerRequest) GetEmail() string {
 type CreatePlayerResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PlayerId      string                 `protobuf:"bytes,1,opt,name=player_id,json=playerId,proto3" json:"player_id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	SkillRank     int32                  `protobuf:"varint,3,opt,name=skill_rank,json=skillRank,proto3" json:"skill_rank,omitempty"`
-	CreatedAt     int64                  `protobuf:"varint,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -118,27 +115,6 @@ func (x *CreatePlayerResponse) GetPlayerId() string {
 		return x.PlayerId
 	}
 	return ""
-}
-
-func (x *CreatePlayerResponse) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *CreatePlayerResponse) GetSkillRank() int32 {
-	if x != nil {
-		return x.SkillRank
-	}
-	return 0
-}
-
-func (x *CreatePlayerResponse) GetCreatedAt() int64 {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return 0
 }
 
 type GetPlayerRequest struct {
@@ -740,14 +716,9 @@ const file_player_proto_rawDesc = "" +
 	"\fplayer.proto\x12\x06player\"?\n" +
 	"\x13CreatePlayerRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x02 \x01(\tR\x05email\"\x85\x01\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\"3\n" +
 	"\x14CreatePlayerResponse\x12\x1b\n" +
-	"\tplayer_id\x18\x01 \x01(\tR\bplayerId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
-	"\n" +
-	"skill_rank\x18\x03 \x01(\x05R\tskillRank\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\x04 \x01(\x03R\tcreatedAt\"/\n" +
+	"\tplayer_id\x18\x01 \x01(\tR\bplayerId\"/\n" +
 	"\x10GetPlayerRequest\x12\x1b\n" +
 	"\tplayer_id\x18\x01 \x01(\tR\bplayerId\"\x86\x02\n" +
 	"\rPlayerProfile\x12\x1b\n" +

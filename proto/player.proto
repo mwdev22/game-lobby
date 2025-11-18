@@ -13,9 +13,6 @@ message CreatePlayerRequest {
 
 message CreatePlayerResponse {
   string player_id = 1;
-  string name = 2;
-  int32 skill_rank = 3;
-  int64 created_at = 4;
 }
 
 message GetPlayerRequest {
@@ -42,6 +39,7 @@ message UpdatePlayerRequest {
   string player_id = 1;
   optional string name = 2;
   optional int32 skill_rank = 3;
+  optional string email = 4;
 }
 
 message UpdatePlayerResponse {

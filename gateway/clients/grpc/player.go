@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"errors"
 	"gateway"
 
 	pb "gen/playerpb"
@@ -19,7 +20,7 @@ func NewPlayerClient(conn *grpc.ClientConn) gateway.PlayerClient {
 	}
 }
 
-func (c *playerClient) CreatePlayer(ctx context.Context, req *gateway.CreatePlayerRequest) (*gateway.PlayerProfile, error) {
+func (c *playerClient) CreatePlayer(ctx context.Context, req *gateway.CreatePlayerRequest) (string, error) {
 	pbReq := &pb.CreatePlayerRequest{
 		Name:  req.Name,
 		Email: req.Email,
@@ -27,15 +28,9 @@ func (c *playerClient) CreatePlayer(ctx context.Context, req *gateway.CreatePlay
 
 	pbResp, err := c.client.CreatePlayer(ctx, pbReq)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-
-	return &gateway.PlayerProfile{
-		PlayerID:  pbResp.PlayerId,
-		Name:      pbResp.Name,
-		SkillRank: pbResp.SkillRank,
-		CreatedAt: pbResp.CreatedAt,
-	}, nil
+	return pbResp.PlayerId, nil
 }
 
 func (c *playerClient) GetPlayer(ctx context.Context, playerID string) (*gateway.PlayerProfile, error) {
@@ -49,7 +44,7 @@ func (c *playerClient) GetPlayer(ctx context.Context, playerID string) (*gateway
 	}
 
 	if pbResp.Player == nil {
-		return nil, nil
+		return nil, errors.New("player not found")
 	}
 
 	return &gateway.PlayerProfile{
@@ -65,38 +60,19 @@ func (c *playerClient) GetPlayer(ctx context.Context, playerID string) (*gateway
 	}, nil
 }
 
-func (c *playerClient) UpdatePlayer(ctx context.Context, req *gateway.UpdatePlayerRequest) (*gateway.PlayerProfile, error) {
+func (c *playerClient) UpdatePlayer(ctx context.Context, req *gateway.UpdatePlayerRequest) error {
 	pbReq := &pb.UpdatePlayerRequest{
 		PlayerId: req.PlayerID,
 	}
 
-	if req.Name != nil {
-		pbReq.Name = req.Name
-	}
-	if req.SkillRank != nil {
-		pbReq.SkillRank = req.SkillRank
-	}
-
 	pbResp, err := c.client.UpdatePlayer(ctx, pbReq)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
 	if pbResp.Player == nil {
-		return nil, nil
+		return err
 	}
-
-	return &gateway.PlayerProfile{
-		PlayerID:     pbResp.Player.PlayerId,
-		Name:         pbResp.Player.Name,
-		Email:        pbResp.Player.Email,
-		SkillRank:    pbResp.Player.SkillRank,
-		TotalMatches: pbResp.Player.TotalMatches,
-		Wins:         pbResp.Player.Wins,
-		Losses:       pbResp.Player.Losses,
-		CreatedAt:    pbResp.Player.CreatedAt,
-		LastOnline:   pbResp.Player.LastOnline,
-	}, nil
+	return nil
 }
 
 func (c *playerClient) GetPlayerStats(ctx context.Context, playerID string) (*gateway.PlayerStats, error) {

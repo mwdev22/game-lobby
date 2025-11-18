@@ -1,6 +1,10 @@
 package gateway
 
-import "context"
+import (
+	"context"
+	"errors"
+	"fmt"
+)
 
 // ==================== Matchmaking Client ====================
 
@@ -10,6 +14,8 @@ type MatchmakingClient interface {
 	GetQueueStatus(ctx context.Context, playerID string) (*QueueStatus, error)
 	CancelMatch(ctx context.Context, playerID, matchID string) (bool, error)
 	GetMatchHistory(ctx context.Context, playerID string, limit, offset int) ([]MatchInfo, error)
+	GetPlayersByMatchID(ctx context.Context, matchIDs []string) ([]PlayerProfile, error)
+	GetMatch(ctx context.Context, id string) (*MatchInfo, error)
 }
 
 type QueueJoinResult struct {
@@ -44,9 +50,10 @@ type PlayerInfo struct {
 // ==================== Player Client ====================
 
 type PlayerClient interface {
-	CreatePlayer(ctx context.Context, req *CreatePlayerRequest) (*PlayerProfile, error)
+	CreatePlayer(ctx context.Context, req *CreatePlayerRequest) (string, error)
+
 	GetPlayer(ctx context.Context, playerID string) (*PlayerProfile, error)
-	UpdatePlayer(ctx context.Context, req *UpdatePlayerRequest) (*PlayerProfile, error)
+	UpdatePlayer(ctx context.Context, req *UpdatePlayerRequest) error
 	GetPlayerStats(ctx context.Context, playerID string) (*PlayerStats, error)
 	SearchPlayers(ctx context.Context, query string, limit, offset int) ([]PlayerProfile, error)
 }
@@ -100,3 +107,13 @@ type PlayerSessionResult struct {
 	Score    int32  `json:"score"`
 	Winner   bool   `json:"winner"`
 }
+
+var (
+	ErrInvalidInput = errors.New("invalid input")
+	ErrInternal     = func(err error) error {
+		return fmt.Errorf("internal server error: %w", err)
+	}
+	ErrNotFound = func(name string) error {
+		return fmt.Errorf("%s not found", name)
+	}
+)

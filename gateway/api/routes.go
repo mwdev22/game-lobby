@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"gateway"
 	"net/http"
 
@@ -40,6 +41,20 @@ func (a *Api) Ping(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"message":"pong"}`))
 }
 
+// ----------- Player Routes -----------
+
+func (a *Api) GetPlayer(w http.ResponseWriter, r *http.Request) error {
+	playerID := chi.URLParam(r, "id")
+	profile, err := a.service.GetPlayer(r.Context(), playerID)
+	if err != nil {
+		return errs.InternalServerError(err)
+	}
+
+	return jsonutil.Write(w, http.StatusOK, gateway.ApiResponse{
+		Data: profile,
+	})
+}
+
 // Create player
 // @Accept      json
 // @Produce     json
@@ -50,14 +65,98 @@ func (a *Api) CreatePlayer(w http.ResponseWriter, r *http.Request) error {
 		return errs.InvalidJson(err)
 	}
 
-	rsp, err := a.player.CreatePlayer(r.Context(), &payload)
+	if payload.Name == "" || payload.Email == "" {
+		return errs.InvalidJson(errors.New("empty name or email"))
+	}
+
+	id, err := a.service.CreatePlayer(r.Context(), &payload)
 	if err != nil {
 		return errs.InternalServerError(err)
 	}
 
 	return jsonutil.Write(w, http.StatusOK, gateway.ApiResponse{
 		Data: map[string]string{
-			"id": rsp.PlayerID,
+			"id": id,
 		},
 	})
+}
+
+func (a *Api) UpdatePlayer(w http.ResponseWriter, r *http.Request) error {
+	var payload gateway.UpdatePlayerRequest
+	if err := jsonutil.Parse(r, &payload); err != nil {
+		return errs.InvalidJson(err)
+	}
+
+	err := a.service.UpdatePlayer(r.Context(), &payload)
+	if err != nil {
+		return errs.InternalServerError(err)
+	}
+
+	return jsonutil.Write(w, http.StatusOK, gateway.ApiResponse{
+		Data: map[string]string{
+			"status": "updated",
+		},
+	})
+}
+
+func (a *Api) GetPlayerStats(w http.ResponseWriter, r *http.Request) error {
+	playerID := chi.URLParam(r, "id")
+	stats, err := a.service.GetPlayerStats(r.Context(), playerID)
+	if err != nil {
+		return errs.InternalServerError(err)
+	}
+
+	return jsonutil.Write(w, http.StatusOK, gateway.ApiResponse{
+		Data: stats,
+	})
+}
+
+func (a *Api) SearchPlayers(w http.ResponseWriter, r *http.Request) error {
+	// query := r.URL.Query().Get("query")
+	// limit, offset := middleware.GetLimitOffset(r)
+
+	// players, err := a.service.SearchPlayers(r.Context(), query, limit, offset)
+	// if err != nil {
+	// 	return errs.InternalServerError(err)
+	// }
+
+	// return jsonutil.Write(w, http.StatusOK, gateway.ApiResponse{
+	// 	Data: players,
+	// })
+	return nil
+}
+
+// ----------- Matchmaking Routes -----------
+
+func (a *Api) JoinQueue(w http.ResponseWriter, r *http.Request) error {
+	var payload gateway.JoinQueueRequest
+	if err := jsonutil.Parse(r, &payload); err != nil {
+		return errs.InvalidJson(err)
+	}
+
+	return nil
+}
+
+func (a *Api) LeaveQueue(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+func (a *Api) GetQueueStatus(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+func (a *Api) GetMatch(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+func (a *Api) CancelMatch(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+func (a *Api) GetMatchHistory(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+func (a *Api) GetPlayersByMatchID(w http.ResponseWriter, r *http.Request) error {
+	return nil
 }
