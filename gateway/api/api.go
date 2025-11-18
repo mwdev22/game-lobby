@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"gateway"
 	"log"
 	"net/http"
 	"os"
@@ -12,11 +13,13 @@ import (
 	"github.com/go-chi/chi/v5"
 	config "github.com/mwdev22/gocfg"
 	"github.com/rs/cors"
-	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type Api struct {
-	cfg *config.Config
+	cfg         *config.Config
+	matchmaking gateway.MatchmakingClient
+	session     gateway.SessionClient
+	player      gateway.PlayerClient
 }
 
 func New(cfg *config.Config, opts ...func(*Api)) *Api {
@@ -29,13 +32,26 @@ func New(cfg *config.Config, opts ...func(*Api)) *Api {
 	return api
 }
 
+func WithMatchmakingClient(cli gateway.MatchmakingClient) func(*Api) {
+	return func(a *Api) {
+		a.matchmaking = cli
+	}
+}
+
+func WithSessionClient(cli gateway.SessionClient) func(*Api) {
+	return func(a *Api) {
+		a.session = cli
+	}
+}
+
+func WithPlayerClient(cli gateway.PlayerClient) func(*Api) {
+	return func(a *Api) {
+		a.player = cli
+	}
+}
+
 func (a *Api) Run() error {
 	mux := chi.NewMux()
-
-	mux.Handle("/swagger/", httpSwagger.WrapHandler)
-
-	fs := http.StripPrefix("/media/", http.FileServer(http.Dir("./media")))
-	mux.Handle("/media/*", fs)
 
 	a.Mount(mux)
 
